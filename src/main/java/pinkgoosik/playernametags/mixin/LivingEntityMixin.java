@@ -17,7 +17,7 @@ public abstract class LivingEntityMixin {
 
 	@Inject(method = "onStatusEffectApplied", at = @At("TAIL"))
 	void onStatusEffectApplied(StatusEffectInstance effect, Entity source, CallbackInfo ci) {
-		if(LivingEntity.class.cast(this) instanceof ServerPlayerEntity player && effect.getEffectType().equals(StatusEffects.INVISIBILITY)) {
+		if(PlayerNametagsMod.config.enabled && LivingEntity.class.cast(this) instanceof ServerPlayerEntity player && effect.getEffectType().equals(StatusEffects.INVISIBILITY)) {
 			var holder = PlayerNametagsMod.updateHolder(player);
 			holder.getElements().forEach(virtualElement -> {
 				if(virtualElement instanceof ItemDisplayElement element) {
@@ -30,7 +30,7 @@ public abstract class LivingEntityMixin {
 
 	@Inject(method = "onStatusEffectRemoved", at = @At("TAIL"))
 	void onStatusEffectRemoved(StatusEffectInstance effect, CallbackInfo ci) {
-		if(LivingEntity.class.cast(this) instanceof ServerPlayerEntity player && effect.getEffectType().equals(StatusEffects.INVISIBILITY)) {
+		if(PlayerNametagsMod.config.enabled && LivingEntity.class.cast(this) instanceof ServerPlayerEntity player && effect.getEffectType().equals(StatusEffects.INVISIBILITY)) {
 			var holder = PlayerNametagsMod.updateHolder(player);
 			holder.getElements().forEach(virtualElement -> {
 				if(virtualElement instanceof ItemDisplayElement element) {

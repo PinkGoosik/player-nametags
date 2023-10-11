@@ -43,15 +43,19 @@ public class PlayerNametagsMod implements ModInitializer {
 				}
 			}
 			else {
-				holders.forEach((uuid, holder) -> holder.destroy());
-				holders.clear();
+				if(!holders.isEmpty()) {
+					holders.forEach((uuid, holder) -> holder.destroy());
+					holders.clear();
+				}
 			}
 		});
 	}
 
 	public static ElementHolder updateHolder(ServerPlayerEntity player) {
+		ElementHolder holder;
+
 		if (!holders.containsKey(player.getUuid())) {
-			ElementHolder holder = new ElementHolder();
+			holder = new ElementHolder();
 
 			ItemDisplayElement element = new ItemDisplayElement();
 			element.setBillboardMode(DisplayEntity.BillboardMode.CENTER);
@@ -59,50 +63,33 @@ public class PlayerNametagsMod implements ModInitializer {
 			Text text = Placeholders.parseText(TextParserUtils.formatText(getFormat(player)), PlaceholderContext.of(player));
 
 			element.setCustomName(text);
-
-			if(player.isSneaking()) {
-				switch (config.whenSneaking) {
-					case "gray-out" -> element.setSneaking(true);
-					case "hide" -> element.setCustomNameVisible(false);
-					default -> element.setCustomNameVisible(true);
-				}
-			}
-			else {
-				element.setSneaking(false);
-				element.setCustomNameVisible(true);
-			}
+			element.setCustomNameVisible(!player.isInvisible());
 
 			holder.addElement(element);
-			EntityAttachment.of(holder, player);
-			VirtualEntityUtils.addVirtualPassenger(player, element.getEntityId());
-
 			holders.put(player.getUuid(), holder);
-			return holder;
 		}
 		else {
-			ElementHolder holder = holders.get(player.getUuid());
-			holder.getElements().forEach(virtualElement -> {
-				if(virtualElement instanceof ItemDisplayElement element) {
-					if(player.isSneaking()) {
-						switch (config.whenSneaking) {
-							case "gray-out" -> {
-								element.setCustomNameVisible(true);
-								element.setSneaking(player.isSneaking());
-							}
-							case "hide" -> element.setCustomNameVisible(false);
-							default -> element.setCustomNameVisible(true);
-						}
-					}
-					else {
-						element.setSneaking(false);
-						element.setCustomNameVisible(true);
+			holder = holders.get(player.getUuid());
+		}
+
+		holder.getElements().forEach(virtualElement -> {
+			if(virtualElement instanceof ItemDisplayElement element) {
+				if(player.isSneaking()) {
+					switch (config.whenSneaking) {
+						case "gray-out" -> element.setSneaking(true);
+						case "hide" -> element.setCustomNameVisible(false);
 					}
 				}
-			});
-			EntityAttachment.of(holder, player);
-			VirtualEntityUtils.addVirtualPassenger(player, holder.getEntityIds().getInt(0));
-			return holder;
-		}
+				else {
+					element.setSneaking(false);
+				}
+			}
+		});
+
+		EntityAttachment.of(holder, player);
+		VirtualEntityUtils.addVirtualPassenger(player, holder.getEntityIds().getInt(0));
+
+		return holder;
 	}
 
 	public static void updateNametags(MinecraftServer server) {

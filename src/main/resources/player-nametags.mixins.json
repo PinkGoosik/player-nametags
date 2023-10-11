@@ -4,6 +4,7 @@
   "package": "pinkgoosik.playernametags.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "EntityMixin",
     "LivingEntityMixin"
   ],
   "injectors": {
